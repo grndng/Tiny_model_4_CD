@@ -2,7 +2,6 @@ import argparse
 import os
 import shutil
 
-
 import dataset.dataset as dtset
 import torch
 import numpy as np
@@ -36,6 +35,12 @@ def parse_arguments():
         default=0,
         help='id of gpu to use '
         '(only applicable to non-distributed training)')
+
+    e = parser.add_argument(
+        "--epochs",
+        type=int,
+        help="Number of epochs"
+    )
 
     parsed_arguments = parser.parse_args()
 
@@ -199,8 +204,8 @@ def run():
     # Inizialitazion of dataset and dataloader:
     trainingdata = dtset.MyDataset(args.datapath, "train")
     validationdata = dtset.MyDataset(args.datapath, "val")
-    data_loader_training = DataLoader(trainingdata, batch_size=8, shuffle=True)
-    data_loader_val = DataLoader(validationdata, batch_size=8, shuffle=True)
+    data_loader_training = DataLoader(trainingdata, batch_size=4, shuffle=True)
+    data_loader_val = DataLoader(validationdata, batch_size=4, shuffle=True)
 
     # device setting for training
     if torch.cuda.is_available():
@@ -230,12 +235,16 @@ def run():
 
     # choose the optimizer in view of the used dataset
     # Optimizer with tuned parameters for LEVIR-CD
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.00356799066427741,
-                                  weight_decay=0.009449677083344786, amsgrad=False)
+    # optimizer = torch.optim.AdamW(model.parameters(), lr=0.00356799066427741,
+    #                              weight_decay=0.009449677083344786, amsgrad=False)
 
     # Optimizer with tuned parameters for WHU-CD
-    # optimizer = torch.optim.AdamW(model.parameters(), lr=0.002596776436816101,
-    #                                 weight_decay=0.008620171028843307, amsgrad=False)
+    # optimizer = torch.optim.AdamW(model.parameters(), lr=0.002596776436816101, #added 0 and made 0.0002 instead of 0.002
+    #                                weight_decay=0.008620171028843307, amsgrad=False)
+
+    # Optimizer by Güren
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, #added 0 and made 0.0002 instead of 0.002
+                                     weight_decay=0.006, amsgrad=False)
 
     # scheduler for the lr of the optimizer
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
@@ -256,8 +265,8 @@ def run():
         scheduler,
         args.log_path,
         writer,
-        epochs=100,
-        save_after=1,
+        epochs=10,
+        save_after=10,
         device=device
     )
     writer.close()

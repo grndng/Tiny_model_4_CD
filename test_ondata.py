@@ -15,7 +15,6 @@ def parse_arguments():
         "--datapath",
         type=str,
         help="data path",
-        default="/home/codegoni/aerial/WHU-CD-256/WHU-CD-256",
     )
     parser.add_argument(
         "--modelpath",

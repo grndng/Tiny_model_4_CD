@@ -1,12 +1,12 @@
 from typing import List, Tuple
-from collections import Sized
+from collections.abc import Sized
 from os.path import join
 import albumentations as alb
 from torchvision.transforms import Normalize
 
 import numpy as np
 import torch
-from matplotlib.image import imread
+from tifffile import imread
 from torch.utils.data import Dataset
 from torch import Tensor
 
@@ -47,8 +47,8 @@ class MyDataset(Dataset, Sized):
         imgname = self._list_images[indx].strip('\n')
 
         # Loading the images:
-        x_ref = imread(join(self._A, imgname))
-        x_test = imread(join(self._B, imgname))
+        x_ref = imread(join(self._A, imgname)).astype("f4")
+        x_test = imread(join(self._B, imgname)).astype("f4")
         x_mask = _binarize(imread(join(self._label, imgname)))
 
         # Data augmentation in case of training:
@@ -113,3 +113,7 @@ def _create_aberration_augmentation():
 
 def _binarize(mask: np.ndarray) -> np.ndarray:
     return np.clip(mask * 255, 0, 1).astype(int)
+
+if __name__ == "__main__":
+    im = imread("data/custom/A/348-4608_3_5.tif")
+    print(im.astype(float).dtype)
